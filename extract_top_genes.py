@@ -5,10 +5,10 @@ Created on Wed Aug 18 10:51:33 2021
 
 Description:
     1. Read files in folder where each file contains one-to-all gene interactions and scores.
-        i) Only keep longest-sequenced gene isoform if different isoforms exist in files (based on .fasta from --sequences input)
+        i) Only keep longest-sequenced gene isoform if different isoforms exist in files
     2. For each file:
         i) Sort interactors in descending order by score (last column in each file)
-        ii) Pull top X (20 for soy-scn, 40 for soy-soy) scoring interactors for given gene file (# top scorers is an option)
+        ii) Pull top X (20 for soy-pathogen, 40 for soy-soy) scoring interactors for given gene file (# top scorers is an option)
         iii) Calculate % of top scorers that include genes of interest
     3. Add top scorers to Excel under gene column
         i) Format and save as Excel, highlighting any genes of interest found in each column
@@ -50,7 +50,41 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 # DEFINE GENES OF INTEREST TO HIGHLIGHT RED IN EXCEL AND REPORT % FOUND IN TOP SCORERS
 GENES_OF_INTEREST = [
-    
+    'Glyma.06G093500', 'Glyma.04G091700', 'Glyma.02G213400', 'Glyma.14G181100', 'Glyma.01G023900', 'Glyma.02G040900', 'Glyma.07G220900',
+    'Glyma.20G019200', 'Glyma.20G049600', 'Glyma.03G129000', 'Glyma.04G227600', 'Glyma.13G097600', 'Glyma.17G062000', 'Glyma.08G001800',
+    'Glyma.15G162300', 'Glyma.09G056100', 'Glyma.05G152000', 'Glyma.08G108800', 'Glyma.18G263000', 'Glyma.11G254700', 'Glyma.18G266800',
+    'Glyma.13G073000', 'Glyma.U018700', 'Glyma.05G239400', 'Glyma.03G181900', 'Glyma.08G046500', 'Glyma.05G183500', 'Glyma.10G058000',
+    'Glyma.13G144800', 'Glyma.09G205000', 'Glyma.13G129500', 'Glyma.01G018000', 'Glyma.08G019100', 'Glyma.11G080700', 'Glyma.19G182400',
+    'Glyma.10G264300', 'Glyma.09G090000', 'Glyma.14G185700', 'Glyma.02G218300', 'Glyma.14G105700', 'Glyma.15G169800', 'Glyma.09G063100',
+    'Glyma.13G350500', 'Glyma.05G171400', 'Glyma.05G152000', 'Glyma.08G108800', 'Glyma.11G254700', 'Glyma.12G078400', 'Glyma.08G209500',
+    'Glyma.06G263000', 'Glyma.12G078300', 'Glyma.18G054400', 'Glyma.11G160400', 'Glyma.03G031900', 'Glyma.15G024000', 'Glyma.01G136100',
+    'Glyma.08G129900', 'Glyma.12G139600', 'Glyma.04G173700', 'Glyma.09G018500', 'Glyma.15G124600', 'Glyma.02G196200', 'Glyma.17G003400',
+    'Glyma.07G270600', 'Glyma.12G189000', 'Glyma.13G312700', 'Glyma.13G064800', 'Glyma.12G095100', 'Glyma.10G262600', 'Glyma.12G028800',
+    'Glyma.11G103900', 'Glyma.13G314900', 'Glyma.02G195900', 'Glyma.19G199300', 'Glyma.03G202600', 'Glyma.10G180600', 'Glyma.18G040000',
+    'Glyma.12G186600', 'Glyma.19G200200', 'Glyma.05G140400', 'Glyma.12G032500', 'Glyma.06G136900', 'Glyma.04G228000', 'Glyma.11G107500',
+    'Glyma.06G093500', 'Glyma.04G004000', 'Glyma.06G003600', 'Glyma.05G189100', 'Glyma.05G140400', 'Glyma.03G088500', 'Glyma.08G095800',
+    'Glyma.18G040000', 'Glyma.16G084800', 'Glyma.09G228500', 'Glyma.12G008000', 'Glyma.11G216500', 'Glyma.10G258300', 'Glyma.04G091700',
+    'Glyma.20G132800', 'Glyma.08G146800', 'Glyma.20G133400', 'Glyma.12G128600', 'Glyma.16G044800', 'Glyma.06G277000', 'Glyma.19G106900',
+    'Glyma.02G213400', 'Glyma.06G198400', 'Glyma.14G181100', 'Glyma.03G009500', 'Glyma.01G023900', 'Glyma.17G074700', 'Glyma.08G014900',
+    'Glyma.02G040900', 'Glyma.07G071000', 'Glyma.02G203000', 'Glyma.03G026900', 'Glyma.20G049600', 'Glyma.05G208300', 'Glyma.01G140600',
+    'Glyma.03G129000', 'Glyma.08G111500', 'Glyma.05G153800', 'Glyma.07G198600', 'Glyma.13G237800', 'Glyma.15G075600', 'Glyma.18G151800',
+    'Glyma.13G177800', 'Glyma.08G343800', 'Glyma.02G191200', 'Glyma.03G253000', 'Glyma.19G250600', 'Glyma.16G082800', 'Glyma.03G090700',
+    'Glyma.18G074100', 'Glyma.13G314900', 'Glyma.08G332900', 'Glyma.02G302500', 'Glyma.12G186600', 'Glyma.14G011600', 'Glyma.17G220000',
+    'Glyma.08G350600', 'Glyma.01G145800', 'Glyma.08G320500', 'Glyma.01G050600', 'Glyma.10G155800', 'Glyma.03G198400', 'Glyma.20G232500',
+    'Glyma.18G165200', 'Glyma.19G196300', 'Glyma.07G118700', 'Glyma.10G134000', 'Glyma.16G178800', 'Glyma.20G037900', 'Glyma.15G047500',
+    'Glyma.08G185200', 'Glyma.09G131500', 'Glyma.17G182500', 'Glyma.19G098200', 'Glyma.04G128200', 'Glyma.08G032900', 'Glyma.07G152400',
+    'Glyma.12G014500', 'Glyma.18G203500', 'Glyma.01G119600', 'Glyma.11G110500', 'Glyma.03G056000', 'Glyma.10G281800', 'Glyma.11G063900',
+    'Glyma.20G107500', 'Glyma.02G059000', 'Glyma.16G141700', 'Glyma.01G178300', 'Glyma.15G047500', 'Glyma.01G003800', 'Glyma.19G144800',
+    'Glyma.07G128100', 'Glyma.16G097900', 'Glyma.08G185200', 'Glyma.10G155800', 'Glyma.20G232500', 'Glyma.07G072100', 'Glyma.03G011000',
+    'Glyma.08G286500', 'Glyma.13G341100', 'Glyma.U027700', 'Glyma.11G134000', 'Glyma.12G058100', 'Glyma.05G207400', 'Glyma.08G014100',
+    'Glyma.08G093400', 'Glyma.04G010700', 'Glyma.01G107900', 'Glyma.13G326600', 'Glyma.14G023000', 'Glyma.19G247400', 'Glyma.15G033300',
+    'Glyma.02G062700', 'Glyma.13G126600', 'Glyma.20G227500', 'Glyma.19G042300', 'Glyma.17G120900', 'Glyma.05G012900', 'Glyma.06G178800',
+    'Glyma.15G169800', 'Glyma.09G063100', 'Glyma.13G350500', 'Glyma.05G040600', 'Glyma.06G076000', 'Glyma.04G075000', 'Glyma.04G200500',
+    'Glyma.04G123800', 'Glyma.17G085700', 'Glyma.04G187000', 'Glyma.01G245100', 'Glyma.15G024000', 'Glyma.06G165000', 'Glyma.04G000200',
+    'Glyma.06G000100', 'Glyma.19G102000', 'Glyma.11G000300', 'Glyma.12G098900', 'Glyma.06G305700', 'Glyma.12G193800', 'Glyma.13G308700',
+    'Glyma.16G049400', 'Glyma.16G147200', 'Glyma.11G080600', 'Glyma.01G162800', 'Glyma.05G035900', 'Glyma.06G178700', 'Glyma.09G035500',
+    'Glyma.08G072300', 'Glyma.08G008200', 'Glyma.15G047500', 'Glyma.17G091500', 'Glyma.08G185200', 'Glyma.09G136900', 'Glyma.15G140000',
+    'Glyma.08G072200', 'Glyma.16G182300'
     ]
 
 MAX_SHEETS = 200
@@ -64,8 +98,9 @@ parser.add_argument('-r', '--result', help='Full path to result file', type=str,
 parser.add_argument('-t', '--top', help='Number of top interactors to include', type=int)
 parser.add_argument('-s', '--sequences', help='Full path to fasta file containing all sequences', type=str)
 parser.add_argument('-a', '--all', help='Flag to all gene isoforms', action='store_true')
-parser.add_argument('-scn_only', '--scn_only', help='Flag to extract only scn scores from any soy gene files', action='store_true')
-parser.add_argument('-soy_only', '--soy_only', help='Flag to extract only scn scores from any scn gene files', action='store_true')
+parser.add_argument('-pathogen_only', '--pathogen_only', help='Flag to extract only pathogen scores from any soy gene files', action='store_true')
+parser.add_argument('-soy_only', '--soy_only', help='Flag to extract only soy scores from any pathogen gene files', action='store_true')
+parser.add_argument('-p', '--prefix', help='Prefix of pathogen gene names for searching/filtering', type=str, default='Hetgly')
 args = parser.parse_args()
 
 # DEFINE USEFUL FUNCTIONS
@@ -198,7 +233,7 @@ def write_to_excel(file, df):
     writer.book = book
     writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
     
-    # Add other gene columns until completed
+    # Add pathogen gene columns until completed
     cols = 0
     sheet_num = 1
     sheet = 'Sheet1'
@@ -253,15 +288,15 @@ if __name__ == '__main__':
     
     try:
     
-        # If only want to get scn scores from files
-        if args.scn_only:
+        # If only want to get non-Soy gene scores from files
+        if args.pathogen_only:
             files = np.array([ f for f in os.listdir(path=args.files) if '.csv' in f and 'Glyma' in f ])
         # If only want to get soy scores from files
         elif args.soy_only:
-            files = np.array([ f for f in os.listdir(path=args.files) if '.csv' in f and 'Heygly' in f ])
+            files = np.array([ f for f in os.listdir(path=args.files) if '.csv' in f and args.prefix in f ])
         else:
             # Get all gene files in folder
-            files = np.array([ f for f in os.listdir(path=args.files) if '.csv' in f and ('Glyma' in f or 'Hetgly' in f) ])
+            files = np.array([ f for f in os.listdir(path=args.files) if '.csv' in f and ('Glyma' in f or args.prefix in f) ])
         print('\nNumber of gene files:', len(files))
         
         # Skip any saved gene columns if exist already
@@ -292,13 +327,13 @@ if __name__ == '__main__':
             # Read file
             df = pd.read_csv(args.files + f)
             
-            # Remove any genes that are not SOY or SCN
-            df = df[(df[df.columns[1]].str.contains('Glyma')) | (df[df.columns[1]].str.contains('Hetgly'))]
+            # Remove any genes that are not SOY or pathogen
+            df = df[(df[df.columns[1]].str.contains('Glyma')) | (df[df.columns[1]].str.contains(args.prefix))]
             df.reset_index(drop=True, inplace=True)
             
-            # If only want to consider SCN for interactor scores
-            if args.scn_only:
-                df = df[df[df.columns[1]].str.contains('Hetgly')]
+            # If only want to consider non-Soy genes for interactor scores
+            if args.pathogen_only:
+                df = df[df[df.columns[1]].str.contains(args.prefix)]
                 df.reset_index(drop=True, inplace=True)
             if args.soy_only:
                 df = df[df[df.columns[1]].str.contains('Glyma')]
